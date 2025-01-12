@@ -145,10 +145,27 @@ points.push(createPoint(-38, 9, -7));
 points.push(createPoint(-39, 17, -42));
 points.push(createPoint(-1, 26, -40));
 
-function createChristmassTree(x, y, z) {
-  const decorations = new THREE.Group();
+function getRandomBetween(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
-  for (let i = 0; i < 12; i++) {
+function getRandomBetweenWithout(min, max, withoutMin, withoutMax) {
+  let random = Math.random() * (max - min) + min;
+  while (random > withoutMin && random < withoutMax) {
+    random = Math.random() * (max - min) + min;
+  }
+  return random;
+}
+
+function createChristmasTreeBaubles(
+  xRange,
+  yRange,
+  zRange,
+  yPosition,
+  group,
+  times
+) {
+  for (let i = 0; i < times; i++) {
     let randomColor = Math.random() * 0xffffff;
     const bauble = new THREE.Mesh(
       new THREE.SphereGeometry(0.5, 16, 16),
@@ -156,14 +173,36 @@ function createChristmassTree(x, y, z) {
         color: randomColor,
       })
     );
-    let randomX = Math.random() * 5 - 2.5;
-    let randomY = Math.random() * 4;
-    let randomZ = Math.random() * 5 - 2.5;
+    // let randomX = Math.random() * xRange - xRange / 2;
+    // let randomY = Math.random() * yRange + yPosition;
+    // let randomZ = Math.random() * zRange - zRange / 2;
+    let randomX = getRandomBetweenWithout(
+      -xRange,
+      xRange,
+      -xRange / 2,
+      xRange / 2
+    );
+    let randomY = Math.random() * yRange + yPosition;
+    let randomZ = getRandomBetweenWithout(
+      -zRange,
+      zRange,
+      -zRange / 2,
+      zRange / 2
+    );
+    // console.log("randomX: " + randomX);
     bauble.position.x = randomX;
     bauble.position.y = randomY;
     bauble.position.z = randomZ;
-    decorations.add(bauble);
+    group.add(bauble);
   }
+}
+
+function createChristmassTree(x, y, z) {
+  const decorations = new THREE.Group();
+
+  createChristmasTreeBaubles(2.4, 0.6, 2.4, 1, decorations, 4);
+  createChristmasTreeBaubles(1.8, 0.6, 1.9, 2.7, decorations, 3);
+  createChristmasTreeBaubles(0.8, 0.6, 0.8, 4, decorations, 2);
 
   const top = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 16, 16),
@@ -189,10 +228,15 @@ function createChristmassTree(x, y, z) {
   );
   tree.add(log);
 
+  let leavesColor = new THREE.Color().setRGB(
+    getRandomBetween(0.0, 0.1),
+    getRandomBetween(0.25, 0.7),
+    getRandomBetween(0.0, 0.1)
+  );
   const leaves1 = new THREE.Mesh(
     new THREE.ConeGeometry(3.5, 2.5, 20, 20),
     new THREE.MeshStandardMaterial({
-      color: 0x55cc55,
+      color: leavesColor,
     })
   );
   leaves1.position.y = 2;
@@ -200,7 +244,7 @@ function createChristmassTree(x, y, z) {
   const leaves2 = new THREE.Mesh(
     new THREE.ConeGeometry(2.5, 2, 20, 20),
     new THREE.MeshStandardMaterial({
-      color: 0x55cc55,
+      color: leavesColor,
     })
   );
   leaves2.position.y = 3.5;
@@ -208,7 +252,7 @@ function createChristmassTree(x, y, z) {
   const leaves3 = new THREE.Mesh(
     new THREE.ConeGeometry(1.5, 1, 20, 20),
     new THREE.MeshStandardMaterial({
-      color: 0x55cc55,
+      color: leavesColor,
     })
   );
   leaves3.position.y = 4.5;
@@ -398,20 +442,18 @@ function updateScore() {
 }
 updateScore();
 
-const particleCount = 10000; // Number of snowflakes
+const particleCount = 10000;
 const particles = new THREE.BufferGeometry();
 const positions = [];
-const velocities = []; // Store velocity for each particle
+const velocities = [];
 
-// Create particles
 for (let i = 0; i < particleCount; i++) {
-  // Randomize initial positions
-  const x = (Math.random() - 0.5) * 100;
-  const y = Math.random() * 100;
-  const z = (Math.random() - 0.5) * 100;
+  const x = (Math.random() - 0.5) * 150;
+  const y = Math.random() * 65;
+  const z = (Math.random() - 0.5) * 150;
 
   positions.push(x, y, z);
-  velocities.push(0, -Math.random() * 0.01 - 0.01, 0); // Add a small downward velocity
+  velocities.push(0, -Math.random() * 0.01 - 0.01, 0);
 }
 
 particles.setAttribute(
