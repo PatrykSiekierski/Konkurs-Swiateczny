@@ -163,7 +163,8 @@ function createChristmasTreeBaubles(
   zRange,
   yPosition,
   group,
-  times
+  times,
+  christmassTreeBaublesLocations
 ) {
   for (let i = 0; i < times; i++) {
     let randomColor = Math.random() * 0xffffff;
@@ -173,9 +174,6 @@ function createChristmasTreeBaubles(
         color: randomColor,
       })
     );
-    // let randomX = Math.random() * xRange - xRange / 2;
-    // let randomY = Math.random() * yRange + yPosition;
-    // let randomZ = Math.random() * zRange - zRange / 2;
     let randomX = getRandomBetweenWithout(
       -xRange,
       xRange,
@@ -189,6 +187,23 @@ function createChristmasTreeBaubles(
       -zRange / 2,
       zRange / 2
     );
+
+    let boubleVector = new THREE.Vector3(randomX, randomY, randomZ);
+    let i = 0;
+
+    while (
+      checkDistance(boubleVector, 1, christmassTreeBaublesLocations) &&
+      i < 100
+    ) {
+      boubleVector = new THREE.Vector3(
+        getRandomBetweenWithout(-xRange, xRange, -xRange / 2, xRange / 2),
+        Math.random() * yRange + yPosition,
+        getRandomBetweenWithout(-zRange, zRange, -zRange / 2, zRange / 2)
+      );
+      console.log("Rol");
+      i++;
+    }
+
     // console.log("randomX: " + randomX);
     bauble.position.x = randomX;
     bauble.position.y = randomY;
@@ -200,9 +215,35 @@ function createChristmasTreeBaubles(
 function createChristmassTree(x, y, z) {
   const decorations = new THREE.Group();
 
-  createChristmasTreeBaubles(2.4, 0.6, 2.4, 1, decorations, 4);
-  createChristmasTreeBaubles(1.8, 0.6, 1.9, 2.7, decorations, 3);
-  createChristmasTreeBaubles(0.8, 0.6, 0.8, 4, decorations, 2);
+  let christmassTreeBaublesLocations = [];
+
+  createChristmasTreeBaubles(
+    2.4,
+    0.6,
+    2.4,
+    1,
+    decorations,
+    4,
+    christmassTreeBaublesLocations
+  );
+  createChristmasTreeBaubles(
+    1.8,
+    0.6,
+    1.9,
+    2.7,
+    decorations,
+    3,
+    christmassTreeBaublesLocations
+  );
+  createChristmasTreeBaubles(
+    0.8,
+    0.6,
+    0.8,
+    4,
+    decorations,
+    2,
+    christmassTreeBaublesLocations
+  );
 
   const top = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 16, 16),
@@ -275,8 +316,39 @@ function createChristmassTree(x, y, z) {
 function getRandomInt2(min, ammount) {
   return Math.floor(Math.random() * ammount + min);
 }
+
+let christmassTreeLocations = [];
+
+function checkDistance(vector, minDistance, checkedValues) {
+  for (let i = 0; i < checkedValues.length; i++) {
+    if (vector.distanceTo(checkedValues[i]) <= minDistance) {
+      return true;
+    }
+  }
+  checkedValues.push(vector);
+  return false;
+}
+
 for (let i = 0; i < 100; i++) {
-  createChristmassTree(getRandomInt2(-100, 200), 0, getRandomInt2(-100, 200));
+  const min = -100;
+  const max = 200;
+  let randomVector = new THREE.Vector3(
+    getRandomInt2(min, max),
+    0,
+    getRandomInt2(min, max)
+  );
+  let i = 0;
+
+  while (checkDistance(randomVector, 15, christmassTreeLocations) && i < 100) {
+    randomVector = new THREE.Vector3(
+      getRandomInt2(min, max),
+      0,
+      getRandomInt2(min, max)
+    );
+    i++;
+  }
+
+  createChristmassTree(randomVector.x, randomVector.y, randomVector.z);
 }
 
 const metaBox = new THREE.Mesh(
